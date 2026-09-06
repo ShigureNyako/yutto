@@ -49,12 +49,49 @@ jobs:
         run: |
           just ci-test ${{ matrix.python-version }}
 
+  benchmarks:
+    name: Python 3.14 benchmarks (CodSpeed)
+    runs-on: ubuntu-latest
+    # Preserve PR comparisons, main baselines and manual runs, but not merge
+    # groups or workflows running in forks. No needs: unit tests finish separately.
+    if: ${{ github.event_name != 'merge_group' && !github.event.repository.fork }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+
+      - name: Install python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          architecture: "x64"
+          allow-prereleases: true
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          just ci-install 3.14
+
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v5
-        if: ${{ matrix.python-version == '3.14' && github.event_name != 'merge_group' && !github.event.repository.fork }}
         with:
           mode: simulation
-          run: uv run -p ${{ matrix.python-version }} pytest --codspeed
+          run: uv run -p 3.14 pytest --codspeed
 
   unit-test-rust:
     name: yutto Rust unit test
