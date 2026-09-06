@@ -15,6 +15,11 @@ jobs:
         python-version: ["3.11"]
         architecture: ["x64"]
     name: Lint and Format (Python)
+    env:
+      # Keep just's uv run commands from reinstalling the native workspace packages.
+      UV_NO_SYNC: "true"
+      # Let ty resolve the workspace sources and their native-extension stubs.
+      PYTHONPATH: ${{ github.workspace }}/src:${{ github.workspace }}/packages/biliass/src
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -30,9 +35,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
       - name: Install just
         uses: extractions/setup-just@v4
         env:
@@ -40,7 +42,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          just ci-install ${{ matrix.python-version }}
+          # Keep third-party dependencies for ty, but skip native workspace builds.
+          uv sync --locked --all-extras --dev --no-install-workspace -p ${{ matrix.python-version }}
 
       - name: lint
         run: |
