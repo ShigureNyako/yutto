@@ -11,20 +11,9 @@ import sysconfig
 import tomllib
 from pathlib import Path
 
-# Include packaging inputs as well as native sources: non-editable wheels also
-# contain Python files. Keep tests/docs out so their changes can reuse wheels.
-COMMON_INPUTS = [
-    "pyproject.toml",
-    "uv.lock",
-    "justfile",
-    ".cargo",
-    "rust-toolchain",
-    "rust-toolchain.toml",
-    "scripts/prepare-ci-cache.py",
-    ".github/workflows/unit-test.yml",
-    ".github/workflows/e2e-test.yml",
-    ".github/workflows/lint-and-fmt.yml",
-]
+# Include wheel inputs, not the workflows/scripts that invoke the build.
+# Define compiler/feature environment variables before running this helper.
+COMMON_INPUTS = ["pyproject.toml", "uv.lock", ".cargo", "rust-toolchain", "rust-toolchain.toml"]
 PACKAGES = {
     "YUTTO_CI_WHEEL_KEY": ("pyproject.toml", ["src/yutto", "rust", "README.md", "LICENSE"]),
     "BILIASS_CI_WHEEL_KEY": ("packages/biliass/pyproject.toml", ["packages/biliass"]),
