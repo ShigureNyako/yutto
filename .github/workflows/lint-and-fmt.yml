@@ -19,10 +19,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up Python CI
-        uses: ./.github/actions/setup-python-ci
+      - name: Install python
+        id: python
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+          allow-prereleases: true
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare wheel cache identity
+        id: wheels
+        run: python scripts/prepare-ci-cache.py
+
+      - name: Install uv
+        id: uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: ""
+          cache-suffix: ci-wheels-${{ steps.wheels.outputs.cache-key }}
+          prune-cache: true
+
+      - name: Cache native build dependencies
+        if: steps.uv.outputs.cache-hit != 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust
+            packages/biliass/rust
+          shared-key: native-${{ matrix.python-version }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml', 'uv.lock') }}
+          env-vars: ImageOS PYO3 PYTHON MATURIN UV YUTTO_CI_BUILD_ENV_KEY
+          cache-bin: false
 
       - name: Install just
         uses: extractions/setup-just@v4

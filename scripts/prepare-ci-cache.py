@@ -20,7 +20,7 @@ COMMON_INPUTS = [
     ".cargo",
     "rust-toolchain",
     "rust-toolchain.toml",
-    ".github/actions/setup-python-ci",
+    "scripts/prepare-ci-cache.py",
     ".github/workflows/unit-test.yml",
     ".github/workflows/e2e-test.yml",
     ".github/workflows/lint-and-fmt.yml",

@@ -13,7 +13,7 @@ import pytest
 pytestmark = pytest.mark.processor
 
 ROOT = Path(__file__).resolve().parents[2]
-HELPER = runpy.run_path(str(ROOT / ".github/actions/setup-python-ci/prepare-cache.py"))
+HELPER = runpy.run_path(str(ROOT / "scripts/prepare-ci-cache.py"))
 fingerprint = HELPER["fingerprint"]
 prepare_metadata = HELPER["prepare_metadata"]
 
@@ -69,13 +69,15 @@ def test_content_changes_invalidate_but_checkout_timestamps_do_not(checkout: Pat
     path = checkout / name
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("original")
-    before = fingerprint(checkout, [name], {"abi": "cp314"})
+    package = "BILIASS_CI_WHEEL_KEY" if name.startswith("packages/biliass/") else "YUTTO_CI_WHEEL_KEY"
+    inputs = [*HELPER["COMMON_INPUTS"], *HELPER["PACKAGES"][package][1]]
+    before = fingerprint(checkout, inputs, {"abi": "cp314"})
     os.utime(path, (1, 1))
-    assert fingerprint(checkout, [name], {"abi": "cp314"}) == before
+    assert fingerprint(checkout, inputs, {"abi": "cp314"}) == before
     path.write_text("changed")
-    assert fingerprint(checkout, [name], {"abi": "cp314"}) != before
+    assert fingerprint(checkout, inputs, {"abi": "cp314"}) != before
     path.unlink()
-    assert fingerprint(checkout, [name], {"abi": "cp314"}) != before
+    assert fingerprint(checkout, inputs, {"abi": "cp314"}) != before
 
 
 def test_input_paths_and_modes_contribute_to_identity(checkout: Path):
