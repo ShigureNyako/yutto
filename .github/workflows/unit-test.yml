@@ -21,33 +21,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: true
-
-      - name: Install python
-        id: python
-        uses: actions/setup-python@v7
+      - name: Set up Python CI
+        uses: ./.github/actions/setup-python-ci
         with:
           python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
-          allow-prereleases: true
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      # Cache dependencies, not workspace crates or editable wheels. Cargo still
-      # builds the checked-out sources, including biliass's generated protobuf.
-      - name: Cache native build dependencies
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          workspaces: |
-            rust
-            packages/biliass/rust
-          shared-key: native-${{ matrix.python-version }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml', 'uv.lock') }}
-          env-vars: ImageOS PYO3 PYTHON MATURIN UV
-          cache-bin: false
 
       - name: Install just
         uses: extractions/setup-just@v4
@@ -76,31 +53,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: true
-
-      - name: Install python
-        id: python
-        uses: actions/setup-python@v7
+      - name: Set up Python CI
+        uses: ./.github/actions/setup-python-ci
         with:
           python-version: "3.14"
-          architecture: "x64"
-          allow-prereleases: true
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache native build dependencies
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          workspaces: |
-            rust
-            packages/biliass/rust
-          shared-key: native-3.14-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml', 'uv.lock') }}
-          env-vars: ImageOS PYO3 PYTHON MATURIN UV
-          cache-bin: false
 
       - name: Install just
         uses: extractions/setup-just@v4

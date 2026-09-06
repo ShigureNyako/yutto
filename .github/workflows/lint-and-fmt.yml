@@ -19,19 +19,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: true
-
-      - name: Install python
-        uses: actions/setup-python@v7
+      - name: Set up Python CI
+        uses: ./.github/actions/setup-python-ci
         with:
           python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
 
       - name: Install just
         uses: extractions/setup-just@v4

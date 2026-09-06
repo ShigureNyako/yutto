@@ -19,32 +19,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.0.1
-        with:
-          enable-cache: true
-
-      - name: Install python
-        id: python
-        uses: actions/setup-python@v7
+      - name: Set up Python CI
+        uses: ./.github/actions/setup-python-ci
         with:
           python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
-          allow-prereleases: true
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      # Share dependency builds with unit tests, keeping Python ABIs separate.
-      - name: Cache native build dependencies
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          workspaces: |
-            rust
-            packages/biliass/rust
-          shared-key: native-${{ matrix.python-version }}-${{ steps.python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml', 'uv.lock') }}
-          env-vars: ImageOS PYO3 PYTHON MATURIN UV
-          cache-bin: false
 
       - name: Install tools
         run: |
